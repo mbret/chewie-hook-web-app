@@ -1,7 +1,7 @@
 'use strict';
 import ClientWebServer from "../../server";
 import ScenarioReadable from "../../../../core/scenario/scenario-readable";
-import {SystemError} from "../../../../core/error";
+import {SystemError} from 'chewie-system'
 import {ScenarioModel} from "../../../../core/shared-server-api/lib/models/scenario";
 
 module.exports = function (router) {

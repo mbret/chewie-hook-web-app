@@ -1,12 +1,12 @@
 'use strict';
 
 import * as _ from "lodash";
-import {HookContainer} from "../../../../core/hook-container";
+import {HookContainer} from 'chewie-system'
 
 module.exports = function (router) {
 
-    router.get("/", function(req, res) {
-        return res.ok(Object.keys(req.app.locals.system.hooks).map(function(key) {
+    router.get("/", function (req, res) {
+        return res.ok(Object.keys(req.app.locals.system.hooks).map(function (key) {
             let container: HookContainer = req.app.locals.system.hooks[key];
             return {
                 name: key,
@@ -18,7 +18,7 @@ module.exports = function (router) {
         }));
     });
 
-    router.get("/:name", function(req, res) {
+    router.get("/:name", function (req, res) {
         let name = req.params.name;
         let found = Object.keys(req.app.locals.system.hooks).find(key => key === name);
         if (!found) {

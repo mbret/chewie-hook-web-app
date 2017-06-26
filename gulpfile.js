@@ -3,27 +3,27 @@ let gulp = require('gulp')
 let gutil = require('gulp-util')
 let vfs = require('vinyl-fs')
 const less = require('gulp-less')
-const changed = require('gulp-changed');
+const changed = require('gulp-changed')
 let path = require('path')
 const inject = require('gulp-inject')
 const series = require('stream-series')
 const _ = require('lodash')
 const merge = require('merge-stream')
-const tasks = require('./tasks')
 let ngAnnotate = require('gulp-ng-annotate')
 let basePath = __dirname
 let copyOfNodeModulesDestPath = './public/node_modules'
-let distAppPath = path.join(basePath, '/.dist/hooks/client-web-server')
-let srcAppPath = path.join(basePath, 'src/hooks/client-web-server')
-let buildPath = path.join(distAppPath, '.build')
+let distAppPath = './dist'
+let srcAppPath = './src'
+let buildPath = './dist/.build'
 copyOfNodeModulesDestPath = path.join(distAppPath, copyOfNodeModulesDestPath)
 
 let config = {
-  distPath: '.dist',
+  distPath: 'dist',
   publicPath: __dirname + '/public',
   buildPath: buildPath,
   basePath: basePath,
   srcAppPath: srcAppPath,
+  appBuildPath: 'dist/.build',
   nodeModulesPath: path.join(basePath, 'node_modules'),
   copyOfNodeModulesDestPath: copyOfNodeModulesDestPath,
   distAppPath: distAppPath,
@@ -32,7 +32,7 @@ let config = {
     'src/**/*.*',
     '!src/**/*.ts',
     // ignore public from client-web-server hook to avoid large data
-    '!src/hooks/client-web-server/public/**/*'
+    '!src/public/**/*'
   ],
   vendorsToInject: [
     'vendors/jquery/dist/jquery.js',
@@ -74,7 +74,7 @@ gulp.task('client-web-server:copy-vendors-local', function () {
     config.srcAppPath + '/public/vendors/angular-messages/angular-messages.js',
     config.srcAppPath + '/public/vendors/iCheck/**/*',
     config.srcAppPath + '/public/vendors/masonry/dist/**/*',
-    config.srcAppPath + '/public/vendors/bootstrap-daterangepicker/**/*',
+    config.srcAppPath + '/public/vendors/bootstrap-daterangepicker/**/*'
   ], {base: config.srcAppPath + '/public/vendors'})
     .pipe(gulp.dest(config.buildPath + '/vendors'))
 })
@@ -115,14 +115,16 @@ gulp.task('client-web-server:copy-vendors-npm', function () {
     .pipe(gulp.dest(config.buildPath + '/vendors'))
 })
 
-gulp.task('client-web-server:symlinks', gulp.parallel('client-web-server:copy-vendors-npm', 'client-web-server:copy-vendors-local', function () {
-  return gulp.src([
-    'public/resources',
-  ], {
-    cwd: config.srcAppPath
-  })
-    .pipe(gulp.symlink(config.buildPath))
-}))
+gulp.task('client-web-server:symlinks', gulp.parallel(
+  'client-web-server:copy-vendors-npm',
+  'client-web-server:copy-vendors-local', function () {
+    return gulp.src([
+      'public/resources'
+    ], {
+      cwd: config.srcAppPath
+    })
+      .pipe(gulp.symlink(config.buildPath))
+  }))
 
 gulp.task('client-web-server:copy-public', function () {
   return gulp
@@ -131,7 +133,7 @@ gulp.task('client-web-server:copy-public', function () {
         '!public/{css,css/**}',
         '!public/resources/**',
         '!public/vendors/**',
-        '!public/**/**.js',
+        '!public/**/**.js'
       ], {
         cwd: config.srcAppPath
       }
@@ -145,7 +147,7 @@ gulp.task('client-web-server:process-js', function () {
     .src([
         'public/**/**.js',
         '!public/resources/**',
-        '!public/vendors/**',
+        '!public/vendors/**'
       ], {
         cwd: config.srcAppPath
       }
@@ -154,32 +156,26 @@ gulp.task('client-web-server:process-js', function () {
     .pipe(gulp.dest(config.buildPath))
 })
 
-gulp.task('client-web-server:inject-js', gulp.series(gulp.parallel('client-web-server:process-js', 'client-web-server:copy-public'), function () {
-  let target = gulp.src(config.srcAppPath + '/public/index.html')
-
-  // It's not necessary to read the files (will speed up things), we're only after their paths:
-  let appStream = gulp.src([
-    'app/**/*.module.js',
-    'app/**/module.js',
-    'app/**/*.js',
-
-    // ignore screens file for now
-    '!app/screens/**/*.js'
-  ], {
-    read: false,
-    cwd: config.distAppPath + '/.build'
-  })
-  let vendorsStream = gulp.src(config.vendorsToInject, {
-    read: false,
-    cwd: config.distAppPath + '/.build'
-  })
-
-  return target
-    .pipe(inject(series(vendorsStream, appStream), {
-      ignorePath: '/public',
+gulp.task('client-web-server:inject-js', gulp.series(
+  gulp.parallel(
+    'client-web-server:process-js',
+    'client-web-server:copy-public'
+  ), () => gulp
+    .src(`${config.appBuildPath}/index.html`)
+    .pipe(inject(series(
+      gulp.src(config.vendorsToInject, {read: false, cwd: config.appBuildPath}),
+      gulp.src([
+        'app/**/*.module.js',
+        'app/**/module.js',
+        'app/**/*.js',
+        // ignore screens file for now
+        '!app/screens/**/*.js'
+      ], {read: false, cwd: config.appBuildPath})), {
+      // ignorePath: '/public'
+      relative: true
     }))
     .pipe(gulp.dest(config.buildPath))
-}))
+))
 
 gulp.task('client-web-server:watch-less', function () {
   return gulp.watch([
@@ -201,34 +197,33 @@ gulp.task('client-web-server:build-less', function () {
     .pipe(gulp.dest(path.join(config.buildPath, '/css')))
 })
 
-gulp.task('client-web-server:build', gulp.series('client-web-server:symlinks', gulp.parallel('client-web-server:build-less', 'client-web-server:inject-js')))
 gulp.task('client-web-server:watch', gulp.parallel('client-web-server:watch-less', 'client-web-server:watch-public'))
 
-// -------------------------------------------
-//
-//     Globals Tasks
-//
-// -------------------------------------------
-
-gulp.task('copy', tasks.copy(config, gulp))
-gulp.task('clean', tasks.clean(config, gulp))
-gulp.task('build', tasks.build(config, gulp))
-gulp.task('watch', gulp.parallel('client-web-server:watch', tasks.watch(config, gulp)))
-
-// -------------------------------------------
-//
-//     Various dev tasks
-//
-// -------------------------------------------
-
-// must be run as admin
-gulp.task('generate-plugins-symlink', function () {
-  return vfs.src('../chewie-plugin-date-time', {followSymlinks: false})
-    .pipe(vfs.symlink('.dev/plugins'))
+gulp.task('copy', () => {
+  return gulp
+    .src(config.srcJsFilesGlob, {base: './src'})
+    .pipe(changed(config.distPath))
+    .pipe(gulp.dest(config.distPath))
 })
 
-// must be run as admin
-gulp.task('generate-dev-app-symlink', function () {
-  return vfs.src('../chewie-app', {followSymlinks: false})
-    .pipe(vfs.symlink('.dev'))
-})
+// gulp.task('copy', tasks.copy(config, gulp))
+// gulp.task('clean', tasks.clean(config, gulp))
+gulp.task('build', gulp.series(
+  'client-web-server:symlinks',
+  'copy',
+  gulp.parallel(
+    'client-web-server:build-less',
+    'client-web-server:inject-js'
+  )
+))
+
+gulp.task('watch', gulp.parallel(
+  'client-web-server:watch',
+  () => gulp.task('watch', () => {
+    let tasks = ['copy']
+    let watcher = gulp
+      .watch(config.srcJsFilesGlob, gulp.series.call(null, tasks))
+    watcher
+      .on('all', (event, filepath) => gutil.log(gutil.colors.yellow('Event "%s" on file "%s", running tasks [%s]'), event, filepath, tasks))
+  })
+))

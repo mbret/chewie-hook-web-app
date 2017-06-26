@@ -1,5 +1,5 @@
 'use strict';
-import {getFolderSize} from "../../../../shared/utils";
+import {getFolderSize} from 'chewie-system'
 let fs = require('fs');
 let async = require("async");
 let path = require("path");

@@ -3,7 +3,6 @@
       "src/**/*"
   ],
   "exclude": [
-    "typings/index.d.ts",
     "node_modules"
   ],
   "compilerOptions": {
@@ -13,7 +12,7 @@
     "moduleResolution": "Node",
     "target": "es2017",
     "alwaysStrict": true,
-    "outDir": "./.dist",
+    "outDir": "./dist",
     "sourceMap": true,
     "sourceRoot": "./src"
   }
