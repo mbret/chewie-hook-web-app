@@ -1,0 +1,20 @@
+{
+  "include": [
+      "src/**/*"
+  ],
+  "exclude": [
+    "typings/index.d.ts",
+    "node_modules"
+  ],
+  "compilerOptions": {
+    "module": "commonjs",
+    "removeComments": true,
+    "strictNullChecks": false,
+    "moduleResolution": "Node",
+    "target": "es2017",
+    "alwaysStrict": true,
+    "outDir": "./.dist",
+    "sourceMap": true,
+    "sourceRoot": "./src"
+  }
+}

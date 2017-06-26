@@ -1,0 +1,21 @@
+<div class="flex-container flex--direction-column flex--align-v-center animated fadeIn">
+        <div class="m-xs m-t-md" ng-click="selectProfile(profile)">
+            <div class="m-b-md">
+                <img alt="image" class="img-circle circle-border profile-image-lg" ng-src="{{user.profileImage | profileImageUrl}}">
+            </div>
+            <h3>{{user | userName:true }}</h3>
+        </div>
+        <form class="m-t" role="form" ng-submit="login()">
+            <div class="form-group">
+                <input type="password" class="form-control" placeholder="******" required ng-model="formData.password">
+            </div>
+            <button type="submit" class="btn btn-primary block full-width">Unlock</button>
+            <hr>
+            <a ui-sref="profileSelection" class="btn btn-default block full-width m-t-xs"><i class="fa fa-arrow-circle-left"></i> Profile selection</a>
+            <div class="text-center m-xs">
+                <a href="#">
+                    <small>Forgot password? (coming soon)</small>
+                </a>
+            </div>
+        </form>
+</div>
