@@ -1,0 +1,16 @@
+{
+  "bootstrap": "./.user.bootstrap.js",
+  "systemTmpDir": "./.chewie/.tmp",
+  "systemAppDataPath": "./.chewie",
+  "auth": {
+    "jwtSecret": "my-dummy-secret",
+    "secretPassword": "my-dummy-secret"
+  },
+  "hooks": {
+    "plugins": false,
+    "scenarios": false,
+    "chewie-hook-web-app": {
+      "modulePath": "../"
+    }
+  }
+}
