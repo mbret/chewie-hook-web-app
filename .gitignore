@@ -4,4 +4,4 @@ node_modules
 .npm
 .idea
 .dev/.chewie
-dsit
+dist
